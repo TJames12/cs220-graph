@@ -54,7 +54,11 @@ graph bfs1 {
         g.breadthFirstSearch("A", v);
         
         List<String> order = v.getOrder();
+        System.out.println(order);
         assertEquals("A", order.get(0));
+        assertEquals("D", order.get(1));
+        assertEquals("B", order.get(2));
+        assertEquals("C", order.get(3));
         assertEquals("E", order.get(4));
     }
     
@@ -97,7 +101,11 @@ graph bfs2 {
         g.breadthFirstSearch("A", v);
         
         List<String> order = v.getOrder();
+        System.out.println(order);
         assertEquals("A", order.get(0));
+        assertEquals("C", order.get(1));
+        assertEquals("B", order.get(2));
+        assertEquals("D", order.get(3));
         assertEquals("E", order.get(4));
         assertEquals("F", order.get(5));
         assertEquals("G", order.get(6));
@@ -137,7 +145,10 @@ graph dfs1 {
         List<String> order = v.getOrder();
         System.out.println(order);
         assertEquals("A", order.get(0));
+        assertEquals("D", order.get(1));
         assertEquals("E", order.get(2));
+        assertEquals("C", order.get(3));
+        assertEquals("B", order.get(4));
     }
 
 }

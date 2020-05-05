@@ -12,9 +12,9 @@ public interface INode
     
     void addUndirectedEdgeToNode(INode neighbor, int weight);
     
-    void removeDirectedEdgeToNode(INode neighbor);
+    void removeDirectedEdgeToNode(INode neighbor); 
     
-    void removeUndirectedEdgeToNode(INode neightbor);
+    void removeUndirectedEdgeToNode(INode neighbor); 
     
     boolean hasEdge(INode node);
     

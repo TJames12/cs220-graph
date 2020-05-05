@@ -81,7 +81,6 @@ graph dijkstra1 {
         IGraph graph = GraphFactories.createUndirectedWeightedGraphFromEdgeList(new FileInputStream("tests/dijkstra1.txt"));
         IGraph g2 = graph.primJarnik();
         
-        // TODO: put some assertions here to make sure that g2 works
         INode a = g2.getOrCreateNode("A");
         INode b = g2.getOrCreateNode("B");
         INode c = g2.getOrCreateNode("C");
@@ -89,6 +88,16 @@ graph dijkstra1 {
         INode e = g2.getOrCreateNode("E");
         INode f = g2.getOrCreateNode("F");
         INode g = g2.getOrCreateNode("G");
+        
+        assertEquals(true, g2.getAllNodes().size() == graph.getAllNodes().size());
+        assertEquals(true, g2.containsNode("A") == (graph.containsNode("A")));
+        assertEquals(true, g2.containsNode("B") == (graph.containsNode("B")));
+        assertEquals(true, g2.containsNode("C") == (graph.containsNode("C")));
+        assertEquals(true, g2.containsNode("D") == (graph.containsNode("D")));
+        assertEquals(true, g2.containsNode("E") == (graph.containsNode("E")));
+        assertEquals(true, g2.containsNode("F") == (graph.containsNode("F")));
+        assertEquals(true, g2.containsNode("G") == (graph.containsNode("G")));
+        
         
         assertEquals(1, c.getWeight(g));
         assertFalse(g.hasEdge(a));

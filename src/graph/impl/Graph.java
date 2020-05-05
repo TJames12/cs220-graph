@@ -1,7 +1,13 @@
 package graph.impl;
-
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
 
 import graph.IGraph;
 import graph.INode;
@@ -17,6 +23,8 @@ import graph.NodeVisitor;
 public class Graph implements IGraph
 {
     
+	private Map<String, INode> nodes = new HashMap<>();
+	
     /**
      * Return the {@link Node} with the given name.
      * 
@@ -29,7 +37,13 @@ public class Graph implements IGraph
      * @return
      */
     public INode getOrCreateNode(String name) {
-        throw new UnsupportedOperationException("Implement this method");
+    	
+        if (!nodes.containsKey(name)) {   
+        	INode node = new Node(name);
+        	nodes.put(name, node);
+        }
+        
+        return nodes.get(name);
     }
 
     /**
@@ -40,7 +54,7 @@ public class Graph implements IGraph
      * @return
      */
     public boolean containsNode(String name) {
-        throw new UnsupportedOperationException("Implement this method");
+        return nodes.containsKey(name);
     }
 
     /**
@@ -49,8 +63,10 @@ public class Graph implements IGraph
      * @return
      */
     public Collection<INode> getAllNodes() {
-        throw new UnsupportedOperationException("Implement this method");
+        return nodes.values();
     }
+    
+    //SEARCHING ALGORITHMS
     
     /**
      * Perform a breadth-first search on the graph, starting at the node
@@ -63,10 +79,25 @@ public class Graph implements IGraph
      */
     public void breadthFirstSearch(String startNodeName, NodeVisitor v)
     {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Implement this method");
+        Set<INode> visited = new HashSet<>();
+        Queue<INode> toVisit = new LinkedList<INode>();
+        toVisit.add(this.getOrCreateNode(startNodeName));
+        
+        while(!toVisit.isEmpty()) { //Go through all nodes in queue
+        	INode curr = toVisit.poll();
+        	
+        	if(visited.contains(curr)) //If node has already been visited
+        		continue;
+        	
+        	v.visit(curr); //Visit node and mark it as visited
+        	visited.add(curr);
+        	
+        	for(INode temp : curr.getNeighbors()) //Add node's neighbors to the queue
+        		if(!visited.contains(temp))
+        			toVisit.add(temp);
+        }
     }
-
+      
     /**
      * Perform a depth-first search on the graph, starting at the node
      * with the given name. The visit method of the {@link NodeVisitor} should
@@ -78,8 +109,23 @@ public class Graph implements IGraph
      */
     public void depthFirstSearch(String startNodeName, NodeVisitor v)
     {
-        // TODO: implement this method
-        throw new UnsupportedOperationException("Implement this method");
+    	Set<INode> visited = new HashSet<>();
+        Stack<INode> toVisit = new Stack<>();
+        toVisit.push(this.getOrCreateNode(startNodeName));
+        
+        while(!toVisit.isEmpty()) { //Go through all nodes in stack
+        	INode curr = toVisit.pop();
+        	
+        	if(visited.contains(curr)) //If node has already been visited
+        		continue;
+        	
+        	v.visit(curr); //Visit node and mark it as visited
+        	visited.add(curr);
+        	
+        	for(INode temp : curr.getNeighbors()) //Add node's neighbors to the stack
+        		if(!visited.contains(temp))
+        			toVisit.push(temp);
+        }
     }
 
     /**
@@ -96,10 +142,31 @@ public class Graph implements IGraph
      * @return
      */
     public Map<INode,Integer> dijkstra(String startName) {
-        // TODO: Implement this method
-        throw new UnsupportedOperationException("Implement this method");
+        Map<INode, Integer> result = new HashMap<>();
+        PriorityQueue<Path> toDo = new PriorityQueue<>();
+        
+        toDo.add(new Path(getOrCreateNode(startName), 0)); //Create first path from given starting node and a weight of 0
+        
+        while(result.size() < nodes.size()) { //Continue until all nodes have been visited and are in the new tree
+        	
+        	Path nextPath = toDo.poll(); //Get the path from the queue
+        	INode curr = nextPath.getNode(); //Get the node from the path
+        	
+        	if(result.containsKey(curr)) //If node has already been visited
+        		continue;
+        	
+        	int cost = nextPath.getCost();
+        	
+        	result.put(curr, cost); //Add the visited node and it's cost into the map as a path
+        	
+        	for(INode node : curr.getNeighbors()) //Add neighbors into the queue
+        		toDo.add(new Path(node, cost + curr.getWeight(node)));
+        }
+  
+        return result;
     }
-    
+
+ 
     /**
      * Perform Prim-Jarnik's algorithm to compute a Minimum Spanning Tree (MST).
      * 
@@ -109,7 +176,42 @@ public class Graph implements IGraph
      * @return
      */
     public IGraph primJarnik() {
-        //TODO Implement this method
-        throw new UnsupportedOperationException();
+        IGraph result = new Graph();
+        PriorityQueue<Edge> toDo = new PriorityQueue<>();
+        
+        INode startNode = nodes.values().iterator().next(); //Start at a "random" node in the graph
+        
+        for(INode node : startNode.getNeighbors()) //Add all edges from the start node to it's neighbors into the queue 
+        	toDo.add(new Edge(startNode, node, startNode.getWeight(node)));
+        
+        while (result.getAllNodes().size() < this.getAllNodes().size()) { //Continue until all nodes have been visited and are in the new graph
+        	Edge nextEdge = toDo.poll();
+        	
+        	INode start = nextEdge.startNode; //Retrieve start and end nodes from the current edge
+        	String startName = start.getName();
+        	INode end = nextEdge.endNode;
+        	String endName = end.getName();
+        	
+        	if(result.containsNode(startName) && result.containsNode(endName)) //If the nodes are already accounted for
+        		continue;
+        	
+        	INode finStart = result.getOrCreateNode(startName); 
+        	INode finEnd = result.getOrCreateNode(endName);
+        	finStart.addUndirectedEdgeToNode(finEnd, nextEdge.cost); //Add the final start and end nodes into the new graph
+        	
+        	for(INode node : end.getNeighbors()) //Add neighbors to the queue
+        		if(!node.equals(start))
+        			toDo.add(new Edge(end,node,end.getWeight(node)));
+ 
+        }
+        
+        return result;
     }
+    
+    
+    
+    
+    
+    
+
 }
